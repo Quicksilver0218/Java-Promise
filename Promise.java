@@ -2,8 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -20,22 +19,35 @@ public class Promise<T> {
     }
 
     public static <T> Promise<T> create(Supplier<T> supplier) {
-        return new Promise<>(CompletableFuture.supplyAsync(supplier));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        return new Promise<>(CompletableFuture.supplyAsync(() -> {
+            T value;
+            try {
+                value = supplier.get();
+            } finally {
+                executor.shutdown();
+            }
+            return value;
+        }, executor));
     }
 
     public static Promise<Void> create(Runnable runnable) {
-        return new Promise<>(CompletableFuture.runAsync(runnable));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        return new Promise<>(CompletableFuture.runAsync(() -> {
+            try {
+                runnable.run();
+            } finally {
+                executor.shutdown();
+            }
+        }, executor));
     }
 
     public <U> Promise<U> successThen(Function<T, U> function) {
-        return new Promise<U>(future.thenApply(function));
+        return new Promise<>(future.thenApply(function));
     }
 
     public Promise<Void> successThen(Consumer<T> consumer) {
-        return successThen(value -> {
-            consumer.accept(value);
-            return null;
-        });
+        return new Promise<>(future.thenAccept(consumer));
     }
 
     public <U> Promise<U> failThen(Function<Throwable, U> function) {
