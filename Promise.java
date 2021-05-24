@@ -4,10 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class Promise<T> {
@@ -69,8 +66,15 @@ public class Promise<T> {
         return new Promise<>(future.handle(biFunction));
     }
 
+    public Promise<Void> completeThen(BiConsumer<? super T, Throwable> biConsumer) {
+        return completeThen((v, t) -> {
+            biConsumer.accept(v, t);
+            return null;
+        });
+    }
+
     public <U> Promise<U> completeThen(Supplier<U> supplier) {
-        return completeThen((t, e) -> supplier.get());
+        return completeThen((BiFunction<? super T, Throwable, ? extends U>) (t, e) -> supplier.get());
     }
 
     public Promise<Void> completeThen(Runnable runnable) {
