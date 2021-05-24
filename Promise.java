@@ -85,7 +85,7 @@ public class Promise<T> {
                 try {
                     results.add(new Result.Success<>(future.join()));
                 } catch (Throwable e) {
-                    results.add(new Result.Error(e));
+                    results.add(new Result.Fail(e));
                 }
             return results;
         });
@@ -102,11 +102,11 @@ public class Promise<T> {
         }
 
         @SuppressWarnings("rawtypes")
-        public final static class Error extends Result {
-            public final Throwable error;
+        public final static class Fail extends Result {
+            public final Throwable throwable;
 
-            public Error(Throwable error) {
-                this.error = error;
+            public Fail(Throwable throwable) {
+                this.throwable = throwable;
             }
         }
     }
