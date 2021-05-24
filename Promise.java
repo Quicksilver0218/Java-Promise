@@ -77,10 +77,10 @@ public class Promise<T> {
         return new Promise<>(CompletableFuture.allOf(futures).thenApply(v -> Arrays.stream(futures).map(CompletableFuture::join).collect(Collectors.toCollection(ArrayList::new))));
     }
 
-    public static Promise<ArrayList<Result<?>>> allSettled(Collection<Promise<?>> promises) {
+    public static Promise<ArrayList<Result>> allSettled(Collection<Promise<?>> promises) {
         CompletableFuture<?>[] futures = promises.stream().map(promise -> promise.future).toArray(CompletableFuture[]::new);
         return Promise.create(() -> {
-            ArrayList<Result<?>> results = new ArrayList<>();
+            ArrayList<Result> results = new ArrayList<>();
             for (CompletableFuture<?> future : futures)
                 try {
                     results.add(new Result.Success<>(future.join()));
@@ -91,9 +91,9 @@ public class Promise<T> {
         });
     }
 
-    public static abstract class Result<T> {
+    public static abstract class Result {
 
-        public final static class Success<T> extends Result<T> {
+        public final static class Success<T> extends Result {
             public final T value;
 
             public Success(T value) {
@@ -101,7 +101,6 @@ public class Promise<T> {
             }
         }
 
-        @SuppressWarnings("rawtypes")
         public final static class Fail extends Result {
             public final Throwable throwable;
 
