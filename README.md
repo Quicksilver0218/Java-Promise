@@ -13,6 +13,7 @@ An ECMAScript [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/
 - [`static <U> Promise<U> resolve(Promise<U> promise)`](#resolve-promise)
 - [`static <U> Promise<U> resolve(U value)`](#resolve-value)
 - [`<U> Promise<U> completeThen(BiFunction<? super T, Throwable, ? extends U> biFunction)`](#completeThen-biFunction)
+- [`Promise<Void> completeThen(BiConsumer<? super T, Throwable> biConsumer)`](#completeThen-biConsumer)
 - [`<U> Promise<U> completeThen(Supplier<U> supplier)`](#completeThen-supplier)
 - [`Promise<Void> completeThen(Runnable runnable)`](#completeThen-runnable)
 - [`<U> Promise<U> failThen(Function<Throwable, U> function)`](#failThen-function)
@@ -196,10 +197,144 @@ let promise = Promise.resolve(33);
 Promise<Integer> promise = Promise.resolve(33);
 ```
 ### <a id="completeThen-biFunction"></a>`<U> Promise<U> completeThen(BiFunction<? super T, Throwable, ? extends U> biFunction)`
+#### In JavaScript
+```js
+let newPromise = promise.then(value => {
+    // handle resolve
+    return something;
+}, error => {
+    // handle reject
+    return something;
+});
+promise.finally(() => {
+    // handle complete
+});
+```
+#### Equivalent Here
+```java
+Promise<U> newPromise = promise.completeThen((value, throwable) -> {
+    if (value != null) {
+        // handle resolve
+    } else if (throwable != null) {
+        // handle reject
+    }
+    // handle complete
+    return something;
+});
+```
+### <a id="completeThen-biConsumer"></a>`Promise<Void> completeThen(BiConsumer<? super T, Throwable> biConsumer)`
+#### In JavaScript
+```js
+promise.then(value => {
+    // handle resolve
+}, error => {
+    // handle reject
+});
+let newPromise = promise.finally(() => {
+    // handle complete
+});
+```
+#### Equivalent Here
+```java
+Promise<Void> newPromise = promise.completeThen((value, throwable) -> {
+    if (value != null) {
+        // handle resolve
+    } else if (throwable != null) {
+        // handle reject
+    }
+    // handle complete
+});
+```
 ### <a id="completeThen-supplier"></a>`<U> Promise<U> completeThen(Supplier<U> supplier)`
+#### In JavaScript
+```js
+let newPromise = promise.finally(() => {
+    // handle complete
+    return something;
+});
+```
+#### Equivalent Here
+```java
+Promise<U> newPromise = promise.completeThen(() -> {
+    // handle complete
+    return something;
+});
+```
 ### <a id="completeThen-runnable"></a>`Promise<Void> completeThen(Runnable runnable)`
+#### In JavaScript
+```js
+let newPromise = promise.finally(() => {
+    // handle complete
+});
+```
+#### Equivalent Here
+```java
+Promise<Void> newPromise = promise.completeThen(() -> {
+    // handle complete
+});
+```
 ### <a id="failThen-function"></a>`<U> Promise<U> failThen(Function<Throwable, U> function)`
+#### In JavaScript
+```js
+let newPromise = promise.catch(error => {
+    // handle reject
+    return something;
+});
+```
+#### Equivalent Here
+```java
+Promise<U> newPromise = promise.failThen(throwable -> {
+    // handle reject
+    return something;
+});
+```
 ### <a id="failThen-consumer"></a>`Promise<Void> failThen(Consumer<Throwable> consumer)`
+#### In JavaScript
+```js
+let newPromise = promise.catch(error => {
+    // handle reject
+});
+```
+#### Equivalent Here
+```java
+Promise<Void> newPromise = promise.failThen(throwable -> {
+    // handle reject
+});
+```
 ### <a id="join"></a>`T join()`
+#### In JavaScript
+```js
+let value = await promise;
+```
+#### Equivalent Here
+```java
+T value = promise.join();
+```
 ### <a id="successThen-function"></a>`<U> Promise<U> successThen(Function<T, U> function)`
+#### In JavaScript
+```js
+let newPromise = promise.then(value => {
+    // handle resolve
+    return something;
+});
+```
+#### Equivalent Here
+```java
+Promise<U> newPromise = promise.successThen(value -> {
+    // handle resolve
+    return something;
+});
+```
 ### <a id="successThen-consumer"></a>`Promise<Void> successThen(Consumer<T> consumer)`
+#### In JavaScript
+```js
+let newPromise = promise.then(value => {
+    // handle resolve
+});
+```
+#### Equivalent Here
+```java
+Promise<Void> newPromise = promise.successThen(value -> {
+    // handle resolve
+});
+```
